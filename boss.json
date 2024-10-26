@@ -1,0 +1,9 @@
+{
+	"name": "Migration Manager",
+	"description": "Este repositório contém uma aplicação desenvolvida em Delphi que facilita a migração de dados de tabelas DBF (Advantage Database Server) para PostgreSQL. O projeto utiliza a biblioteca FireDAC para gerenciar conexões e executar a transferência de forma segura e eficiente, garantindo a integridade dos dados. A interface gráfica permite configurar conexões, definir parâmetros de migração e acompanhar o progresso em tempo real. Ideal para desenvolvedores que precisam migrar dados entre esses dois tipos de banco de dados de forma prática e confiável.",
+	"version": "1.0.1",
+	"homepage": "",
+	"mainsrc": "./src",
+	"projects": [],
+	"dependencies": {}
+}
