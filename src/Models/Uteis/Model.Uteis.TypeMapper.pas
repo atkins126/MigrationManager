@@ -1,4 +1,24 @@
-﻿unit Model.Uteis.TypeMapper;
+﻿{***********************************************************************}
+{                                                                       }
+{                          Project Migration                            }
+{                                                                       }
+{ Unit: Model.Uteis.TypeMapper                                          }
+{                                                                       }
+{ Descrição:                                                            }
+{   Implementa a classe TMapTypeMapper, que realiza a conversão de      }
+{   tipos de dados DBF para tipos de dados PostgreSQL, utilizando um    }
+{   mapeamento interno para cada tipo de campo.                         }
+{                                                                       }
+{ Autor: Ricardo R. Pereira                                             }
+{ Data: 26 de outubro de 2024                                           }
+{                                                                       }
+{ Copyright (C) 2024 Ricardo R. Pereira                                 }
+{                                                                       }
+{ Todos os direitos reservados.                                         }
+{                                                                       }
+{***********************************************************************}
+
+unit Model.Uteis.TypeMapper;
 
 interface
 
@@ -8,19 +28,63 @@ uses
   System.Generics.Collections;
 
 type
+  /// <summary>
+  ///   Classe responsável por mapear tipos de dados de DBF para tipos de
+  ///   dados compatíveis com PostgreSQL.
+  /// </summary>
   TMapTypeMapper = class(TInterfacedObject, IMapTypeMapper)
   private
     FFieldType: TFieldType;
     FTypeMap: TDictionary<TFieldType, string>;
 
+    /// <summary>
+    ///   Inicializa o dicionário com os mapeamentos de tipos de dados entre DBF
+    ///   e PostgreSQL.
+    /// </summary>
     procedure InitializeTypeMap;
   protected
+    /// <summary>
+    ///   Define o tipo de campo que será convertido.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Tipo de campo do banco de dados DBF.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IMapTypeMapper"/>.
+    /// </returns>
     function FieldType(AValue: TFieldType): IMapTypeMapper;
+
+    /// <summary>
+    ///   Converte o tipo de campo definido para o tipo correspondente em
+    ///   PostgreSQL.
+    /// </summary>
+    /// <remarks>
+    ///   Se o tipo de campo não estiver definido ou não for suportado,
+    ///   uma exceção será lançada.
+    /// </remarks>
+    /// <returns>
+    ///   Retorna uma string representando o tipo de dado equivalente no
+    ///   PostgreSQL.
+    /// </returns>
     function DBFToPostgreSQL: string;
 
+    /// <summary>
+    ///   Construtor da classe TMapTypeMapper. Inicializa a instância e os
+    ///   mapeamentos de tipos de dados.
+    /// </summary>
     Constructor Create;
   public
+    /// <summary>
+    ///   Destrutor da classe TMapTypeMapper. Libera os recursos alocados.
+    /// </summary>
     Destructor Destroy; override;
+
+    /// <summary>
+    ///   Cria uma nova instância de <see cref="IMapTypeMapper"/>.
+    /// </summary>
+    /// <returns>
+    ///   Retorna uma instância da interface <see cref="IMapTypeMapper"/>.
+    /// </returns>
     class function New: IMapTypeMapper;
   end;
 
@@ -46,7 +110,6 @@ begin
   if not FTypeMap.TryGetValue(FFieldType, Result) then
     raise Exception.CreateFmt('Tipo de dado do DBF não suportado: %d',
       [Ord(FFieldType)]);
-
 end;
 
 destructor TMapTypeMapper.Destroy;
@@ -97,3 +160,4 @@ begin
 end;
 
 end.
+

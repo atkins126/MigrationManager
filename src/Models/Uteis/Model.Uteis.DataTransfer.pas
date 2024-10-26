@@ -1,4 +1,24 @@
-﻿unit Model.Uteis.DataTransfer;
+﻿{***********************************************************************}
+{                                                                       }
+{                          Project Migration                            }
+{                                                                       }
+{ Unit: Model.Uteis.DataTransfer                                        }
+{                                                                       }
+{ Descrição:                                                            }
+{   Implementa a classe TDataTransfer, que realiza a transferência de   }
+{   dados entre consultas usando FireDAC e executa operações de inserção}
+{   em lote com controle de progresso.                                  }
+{                                                                       }
+{ Autor: Ricardo R. Pereira                                             }
+{ Data: 26 de outubro de 2024                                           }
+{                                                                       }
+{ Copyright (C) 2024 Ricardo R. Pereira                                 }
+{                                                                       }
+{ Todos os direitos reservados.                                         }
+{                                                                       }
+{***********************************************************************}
+
+unit Model.Uteis.DataTransfer;
 
 interface
 
@@ -6,10 +26,14 @@ uses
   Repository.Migration.Manager,
   FireDAC.Comp.Client,
   FireDAC.Stan.Param,
-
   Model.Uteis.Callback;
 
 type
+  /// <summary>
+  ///   Classe responsável por gerenciar a transferência de dados entre
+  ///   consultas usando FireDAC, com suporte a operações em lote e
+  ///   callbacks de progresso.
+  /// </summary>
   TDataTransfer = class(TInterfacedObject, IDataTransfer)
   private
     FConnection: TFDConnection;
@@ -19,22 +43,110 @@ type
     FCallback: TProgressCallback;
     FBlockSize: Int64;
 
+    /// <summary>
+    ///   Prepara a instrução SQL de inserção com base nos campos da consulta.
+    /// </summary>
     procedure PrepareInsertSQL;
+
+    /// <summary>
+    ///   Preenche os parâmetros da consulta auxiliar com os valores da
+    ///   consulta principal.
+    /// </summary>
+    /// <param name="AIndex">
+    ///   Índice do parâmetro a ser preenchido.
+    /// </param>
     procedure FillParams(AIndex: Int64);
+
+    /// <summary>
+    ///   Executa a transferência de dados em lotes, utilizando os parâmetros
+    ///   configurados e o callback de progresso.
+    /// </summary>
     procedure ExecuteTransfer;
   protected
-
+    /// <summary>
+    ///   Define a conexão a ser utilizada na transferência de dados.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Instância de <see cref="TFDConnection"/> para o banco de dados.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IDataTransfer"/>.
+    /// </returns>
     function Connection(const AValue: TFDConnection): IDataTransfer;
+
+    /// <summary>
+    ///   Define a consulta a ser utilizada como fonte dos dados.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Instância de <see cref="TFDQuery"/> com os dados a serem transferidos.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IDataTransfer"/>.
+    /// </returns>
     function Query(const AValue: TFDQuery): IDataTransfer;
+
+    /// <summary>
+    ///   Define o nome da tabela de destino para a transferência de dados.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Nome da tabela de destino.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IDataTransfer"/>.
+    /// </returns>
     function TableName(const AValue: string): IDataTransfer;
+
+    /// <summary>
+    ///   Define um callback para monitorar o progresso da transferência.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Função de callback do tipo <see cref="TProgressCallback"/>.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IDataTransfer"/>.
+    /// </returns>
     function Callback(const AValue: TProgressCallback): IDataTransfer;
+
+    /// <summary>
+    ///   Define o tamanho do bloco de registros a ser transferido em cada
+    ///   operação de inserção em lote.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Tamanho do bloco (número de registros).
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IDataTransfer"/>.
+    /// </returns>
     function BlockSize(const AValue: Int64): IDataTransfer;
 
+    /// <summary>
+    ///   Executa a transferência de dados, utilizando as configurações fornecidas.
+    /// </summary>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IDataTransfer"/>.
+    /// </returns>
+    /// <remarks>
+    ///   Levanta exceções caso as configurações estejam incompletas ou inválidas.
+    /// </remarks>
     function Execute: IDataTransfer;
 
+    /// <summary>
+    ///   Construtor da classe TDataTransfer. Inicializa a instância e os
+    ///   recursos necessários para a transferência de dados.
+    /// </summary>
     Constructor Create;
   public
+    /// <summary>
+    ///   Destrutor da classe TDataTransfer. Libera os recursos alocados.
+    /// </summary>
     Destructor Destroy; override;
+
+    /// <summary>
+    ///   Cria uma nova instância de <see cref="IDataTransfer"/>.
+    /// </summary>
+    /// <returns>
+    ///   Retorna uma instância da interface <see cref="IDataTransfer"/>.
+    /// </returns>
     class function New: IDataTransfer;
   end;
 
@@ -44,9 +156,7 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
-
   Data.DB,
-
   Model.Uteis.RTFHandle;
 
 { TDataTransfer }
@@ -217,3 +327,4 @@ begin
 end;
 
 end.
+

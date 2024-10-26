@@ -1,4 +1,23 @@
-﻿unit View.Main;
+﻿{***********************************************************************}
+{                          Project Migration                            }
+{                                                                       }
+{ Unit: View.Main                                                       }
+{                                                                       }
+{ Descrição:                                                            }
+{   Formulário principal da aplicação para realizar a migração de dados }
+{   de uma tabela DBF para PostgreSQL. Permite configurar as conexões,  }
+{   selecionar arquivos, e monitorar o progresso da migração.           }
+{                                                                       }
+{ Autor: Ricardo R. Pereira                                             }
+{ Data: 26 de outubro de 2024                                           }
+{                                                                       }
+{ Copyright (C) 2024 Ricardo R. Pereira                                 }
+{                                                                       }
+{ Todos os direitos reservados.                                         }
+{                                                                       }
+{***********************************************************************}
+
+unit View.Main;
 
 interface
 
@@ -18,6 +37,12 @@ uses
   Repository.Migration.Manager;
 
 type
+  /// <summary>
+  ///   Classe que representa a tela principal do aplicativo, permitindo
+  ///   configurar e iniciar o processo de migração de dados entre DBF
+  ///   e PostgreSQL. Oferece funcionalidades para selecionar caminhos,
+  ///   definir conexões e monitorar o progresso.
+  /// </summary>
   TPageMain = class(TForm)
     pnlMain: TPanel;
     pnlTop: TPanel;
@@ -49,26 +74,84 @@ type
     btCloseStatus: TSpeedButton;
     ProgressBar: TProgressBar;
     cbHideStatus: TCheckBox;
+
+    /// <summary>
+    ///   Fecha a aplicação ou interrompe o processo de migração se estiver em execução.
+    /// </summary>
     procedure btCloseClick(Sender: TObject);
+
+    /// <summary>
+    ///   Configura as propriedades e valores iniciais dos componentes da tela.
+    /// </summary>
     procedure FormCreate(Sender: TObject);
+
+    /// <summary>
+    ///   Inicia o processo de migração, configurando a conexão e executando a migração.
+    /// </summary>
     procedure btMigrationClick(Sender: TObject);
+
+    /// <summary>
+    ///   Fecha o painel de status da migração.
+    /// </summary>
     procedure btCloseStatusClick(Sender: TObject);
+
   private
     FMigration: IMigrationManager;
     FThread: TThread;
     FStartThread: Boolean;
     FStartTime: TDateTime;
 
-    procedure UpdateProgress(const TableName: string;
-      TotalRecords, CurrentRecord: Integer);
+    /// <summary>
+    ///   Atualiza a barra de progresso e exibe a mensagem de status durante a migração.
+    /// </summary>
+    /// <param name="TableName">
+    ///   Nome da tabela sendo migrada.
+    /// </param>
+    /// <param name="TotalRecords">
+    ///   Total de registros na tabela.
+    /// </param>
+    /// <param name="CurrentRecord">
+    ///   Número do registro atual sendo processado.
+    /// </param>
+    procedure UpdateProgress(const TableName: string; TotalRecords, CurrentRecord: Integer);
 
+    /// <summary>
+    ///   Calcula e retorna o tempo decorrido desde o início do processo de migração.
+    /// </summary>
+    /// <param name="AStartTime">
+    ///   Tempo de início do processo.
+    /// </param>
+    /// <returns>
+    ///   String formatada com o tempo decorrido.
+    /// </returns>
     function GetElapsedTime(const AStartTime: TDateTime): string;
 
+    /// <summary>
+    ///   Trata a finalização da thread de migração, exibindo mensagens de sucesso ou erro.
+    /// </summary>
     procedure TrataThread(Sender: TObject);
 
+    /// <summary>
+    ///   Aplica as configurações padrão para os campos e controles do formulário.
+    /// </summary>
     procedure ApplyConfiguration;
+
+    /// <summary>
+    ///   Configura as conexões com os bancos de dados e define os nomes das tabelas.
+    /// </summary>
     procedure DatabaseConfiguration;
+
+    /// <summary>
+    ///   Inicia a migração de dados sem exibir o progresso.
+    /// </summary>
     procedure MigrateTable; overload;
+
+    /// <summary>
+    ///   Inicia a migração de dados exibindo o progresso através do callback.
+    /// </summary>
+    /// <param name="Callback">
+    ///   Função de callback que monitora o progresso da migração.
+    /// </param>
     procedure MigrateTable(Callback: TProgressCallback); overload;
   end;
 
@@ -125,7 +208,6 @@ begin
     MigrateTable
   else
     MigrateTable(UpdateProgress);
-
 end;
 
 procedure TPageMain.DatabaseConfiguration;
@@ -187,7 +269,6 @@ begin
   FThread.FreeOnTerminate := True;
   FThread.OnTerminate := TrataThread;
   FThread.Start;
-
 end;
 
 procedure TPageMain.TrataThread(Sender: TObject);
@@ -230,7 +311,7 @@ begin
 end;
 
 procedure TPageMain.UpdateProgress(const TableName: string;
-TotalRecords, CurrentRecord: Integer);
+  TotalRecords, CurrentRecord: Integer);
 begin
   TThread.Synchronize(TThread.CurrentThread,
     procedure
@@ -241,9 +322,8 @@ begin
       ProgressBar.Visible := True;
       ProgressBar.Max := TotalRecords;
       ProgressBar.Position := CurrentRecord;
-
     end);
-
 end;
 
 end.
+

@@ -1,13 +1,30 @@
-﻿unit Model.Uteis.Connection;
+﻿{***********************************************************************}
+{                          Project Migration                            }
+{                                                                       }
+{ Unit: Model.Uteis.Connection                                          }
+{                                                                       }
+{ Descrição:                                                            }
+{   Implementa a classe TConnection, que gerencia conexões com os       }
+{   bancos de dados ADS e PostgreSQL, utilizando FireDAC para           }
+{   estabelecer e configurar as conexões.                               }
+{                                                                       }
+{ Autor: Ricardo R. Pereira                                             }
+{ Data: 26 de outubro de 2024                                           }
+{                                                                       }
+{ Copyright (C) 2024 Ricardo R. Pereira                                 }
+{                                                                       }
+{ Todos os direitos reservados.                                         }
+{                                                                       }
+{***********************************************************************}
+
+unit Model.Uteis.Connection;
 
 interface
 
 uses
   System.SysUtils,
   System.Classes,
-
   Data.DB,
-
   FireDAC.DatS,
   FireDAC.DApt,
   FireDAC.Phys,
@@ -34,10 +51,14 @@ uses
   FireDAC.Stan.ExprFuncs,
   FireDAC.Phys.SQLiteDef,
   FireDAC.Stan.StorageBin,
-
   Repository.Migration.Manager;
 
 type
+  /// <summary>
+  ///   Classe responsável por gerenciar conexões com bancos de dados ADS
+  ///   e PostgreSQL, incluindo configurações de conexão e manipulação
+  ///   de parâmetros de conexão.
+  /// </summary>
   TConnection = class(TInterfacedObject, IConnection)
   private
     FADSConnection: TFDConnection;
@@ -52,27 +73,117 @@ type
     FPassword: string;
     FPort: string;
 
+    /// <summary>
+    ///   Configura a conexão com o banco de dados ADS (Advantage Database Server).
+    /// </summary>
     procedure SetupADSConnection;
+
+    /// <summary>
+    ///   Configura a conexão com o banco de dados PostgreSQL.
+    /// </summary>
     procedure SetupPGConnection;
   protected
-
+    /// <summary>
+    ///   Define o host do banco de dados.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Endereço do servidor (host) do banco de dados.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IConnection"/>.
+    /// </returns>
     function Host(const AValue: string): IConnection;
+
+    /// <summary>
+    ///   Define o caminho para o banco de dados ADS.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Caminho do arquivo do banco de dados ADS.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IConnection"/>.
+    /// </returns>
     function Path(const AValue: string): IConnection;
+
+    /// <summary>
+    ///   Define o nome do banco de dados PostgreSQL.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Nome do banco de dados PostgreSQL.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IConnection"/>.
+    /// </returns>
     function Database(const AValue: string): IConnection;
+
+    /// <summary>
+    ///   Define o usuário para a conexão com o banco de dados.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Nome de usuário do banco de dados.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IConnection"/>.
+    /// </returns>
     function User(const AValue: string): IConnection;
+
+    /// <summary>
+    ///   Define a senha para a conexão com o banco de dados.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Senha do banco de dados.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IConnection"/>.
+    /// </returns>
     function Password(const AValue: string): IConnection;
+
+    /// <summary>
+    ///   Define a porta de conexão para o banco de dados.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Número da porta para a conexão com o banco de dados.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IConnection"/>.
+    /// </returns>
     function Port(const AValue: Integer): IConnection;
 
+    /// <summary>
+    ///   Obtém a instância configurada da conexão ADS.
+    /// </summary>
+    /// <returns>
+    ///   Retorna a instância de <see cref="TFDConnection"/> configurada para ADS.
+    /// </returns>
     function GetADSConnection: TFDConnection;
+
+    /// <summary>
+    ///   Obtém a instância configurada da conexão PostgreSQL.
+    /// </summary>
+    /// <returns>
+    ///   Retorna a instância de <see cref="TFDConnection"/> configurada para PostgreSQL.
+    /// </returns>
     function GetPGConnection: TFDConnection;
 
+    /// <summary>
+    ///   Construtor da classe TConnection. Inicializa as conexões e os
+    ///   componentes necessários para a conexão com os bancos de dados.
+    /// </summary>
     constructor Create;
 
   public
+    /// <summary>
+    ///   Destrutor da classe TConnection. Libera os recursos alocados.
+    /// </summary>
     destructor Destroy; override;
 
+    /// <summary>
+    ///   Cria uma nova instância de <see cref="IConnection"/>.
+    /// </summary>
+    /// <returns>
+    ///   Retorna uma instância da interface <see cref="IConnection"/>.
+    /// </returns>
     class function New: IConnection;
-
   end;
 
 implementation
@@ -85,11 +196,10 @@ begin
 
   FADSConnection := TFDConnection.Create(nil);
   FPGConnection := TFDConnection.Create(nil);
-  FDGUIxWaitCursor := TFDGUIxWaitCursor.Create(Nil);
+  FDGUIxWaitCursor := TFDGUIxWaitCursor.Create(nil);
   FDGUIxWaitCursor.Provider := 'Console';
   FDriverADS := TFDPhysADSDriverLink.Create(FADSConnection);
   FDriverPG := TFDPhysPgDriverLink.Create(FADSConnection);
-
 end;
 
 function TConnection.Database(const AValue: string): IConnection;
@@ -121,7 +231,6 @@ begin
   FADSConnection.Params.Clear;
   FADSConnection.Params.DriverID := 'ADS';
   FADSConnection.Params.Database := FPath;
-
   FADSConnection.Params.Add('Pooled=False');
   FADSConnection.Params.Add('POOL_MaximumItens=100000');
   FADSConnection.Params.Add('Protocol=TCPIP');
@@ -133,7 +242,6 @@ begin
   FDriverADS.DefaultPath := ExtractFilePath(ParamStr(0));
   FDriverADS.VendorLib := ExtractFilePath(ParamStr(0)) + 'ace64.dll';
   FDriverADS.ShowDeleted := False;
-
 end;
 
 procedure TConnection.SetupPGConnection;
@@ -182,7 +290,7 @@ begin
     Result := FADSConnection;
   except
     on E: Exception do
-      raise Exception.Create('Erro ao conectar ao PostgreSQL: ' + E.Message);
+      raise Exception.Create('Erro ao conectar ao ADS: ' + E.Message);
   end;
 end;
 
@@ -228,3 +336,4 @@ begin
 end;
 
 end.
+

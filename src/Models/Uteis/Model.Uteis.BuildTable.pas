@@ -1,4 +1,23 @@
-﻿unit Model.Uteis.BuildTable;
+﻿{***********************************************************************}
+{                          Project Migration                            }
+{                                                                       }
+{ Unit: Model.Uteis.BuildTable                                          }
+{                                                                       }
+{ Descrição:                                                            }
+{   Implementa a classe TBuildTable, que gera a estrutura de tabelas    }
+{   PostgreSQL com base em uma consulta DBF, realizando a conversão dos }
+{   tipos de dados e criando a tabela no banco de dados.                }
+{                                                                       }
+{ Autor: Ricardo R. Pereira                                             }
+{ Data: 26 de outubro de 2024                                           }
+{                                                                       }
+{ Copyright (C) 2024 Ricardo R. Pereira                                 }
+{                                                                       }
+{ Todos os direitos reservados.                                         }
+{                                                                       }
+{***********************************************************************}
+
+unit Model.Uteis.BuildTable;
 
 interface
 
@@ -8,20 +27,77 @@ uses
   FireDAC.Comp.Client;
 
 type
+  /// <summary>
+  ///   Classe responsável por construir tabelas no banco de dados
+  ///   PostgreSQL, com base na estrutura de campos de uma consulta DBF.
+  /// </summary>
   TBuildTable = class(TInterfacedObject, IBuildTable)
   private
     FQuery: TFDQuery;
     FTableName: string;
     FConnection: TFDConnection;
+
   protected
+    /// <summary>
+    ///   Define a conexão com o banco de dados para criação das tabelas.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Instância de <see cref="TFDConnection"/> para o banco de dados.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IBuildTable"/>.
+    /// </returns>
     function Connection(const AValue: TFDConnection): IBuildTable;
+
+    /// <summary>
+    ///   Define a consulta que será utilizada como base para a criação da
+    ///   tabela.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Instância de <see cref="TFDQuery"/> que contém a estrutura dos dados.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IBuildTable"/>.
+    /// </returns>
     function Query(const AValue: TFDQuery): IBuildTable;
+
+    /// <summary>
+    ///   Define o nome da tabela a ser criada no banco de dados PostgreSQL.
+    /// </summary>
+    /// <param name="AValue">
+    ///   Nome da tabela de destino.
+    /// </param>
+    /// <returns>
+    ///   Retorna a própria instância de <see cref="IBuildTable"/>.
+    /// </returns>
     function TableName(const AValue: string): IBuildTable;
+
+    /// <summary>
+    ///   Realiza a conversão da estrutura da consulta DBF para uma tabela
+    ///   compatível com PostgreSQL.
+    /// </summary>
+    /// <remarks>
+    ///   Levanta exceções caso a consulta, o nome da tabela ou a conexão
+    ///   não estejam devidamente configurados.
+    /// </remarks>
     function DBFToPostgreSQL: IBuildTable;
 
-    Constructor Create;
+    /// <summary>
+    ///   Construtor da classe TBuildTable. Inicializa a instância.
+    /// </summary>
+    constructor Create;
   public
-    Destructor Destroy; override;
+    /// <summary>
+    ///   Destrutor da classe TBuildTable. Libera os recursos alocados.
+    /// </summary>
+    destructor Destroy; override;
+
+    /// <summary>
+    ///   Cria uma nova instância de <see cref="IBuildTable"/>.
+    /// </summary>
+    /// <returns>
+    ///   Retorna uma instância da interface <see cref="IBuildTable"/>.
+    /// </returns>
     class function New: IBuildTable;
   end;
 
@@ -42,7 +118,7 @@ end;
 
 constructor TBuildTable.Create;
 begin
-
+  // Inicialização da instância
 end;
 
 function TBuildTable.DBFToPostgreSQL: IBuildTable;
@@ -91,7 +167,6 @@ end;
 
 destructor TBuildTable.Destroy;
 begin
-
   inherited;
 end;
 
@@ -113,3 +188,4 @@ begin
 end;
 
 end.
+
