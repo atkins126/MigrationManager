@@ -9,11 +9,13 @@ uses
   Vcl.ExtCtrls,
   Vcl.Buttons,
   Vcl.Controls,
+  Vcl.ComCtrls,
+
   System.Classes,
 
   Model.Callback,
   Migration.Manager,
-  Vcl.ComCtrls;
+  Repository.Migration.Manager;
 
 type
   TPageMain = class(TForm)
@@ -52,7 +54,7 @@ type
     procedure btMigrationClick(Sender: TObject);
     procedure btCloseStatusClick(Sender: TObject);
   private
-    FMigration: TMigrationManager;
+    FMigration: IMigrationManager;
     FThread: TThread;
     FStartThread: Boolean;
     FStartTime: TDateTime;
@@ -200,8 +202,6 @@ begin
         else if Assigned(FMigration) then
           lblStatus.Caption := FMigration.GetMigrationStatus + sLineBreak +
             'Tempo de operação: ' + GetElapsedTime(FStartTime);
-        if Assigned(FMigration) then
-          FMigration.DisposeOf;
       end);
   end;
 end;

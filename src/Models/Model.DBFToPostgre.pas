@@ -34,11 +34,13 @@ uses
   FireDAC.Phys.SQLiteDef,
   FireDAC.Stan.StorageBin,
 
-  Model.Callback;
+  Model.Callback,
+
+  Repository.Migration.Manager;
 
 type
 
-  TDBFToPostgre = class
+  TDBFToPostgre = class(TInterfacedObject, IDBFToPostgre)
   private
     FADSConnection: TFDConnection;
     FPGConnection: TFDConnection;
@@ -60,17 +62,17 @@ type
       ProgressCallback: TProgressCallback); overload;
 
   protected
+    function MigrateTable(const DBFTableName, PGTableName: string)
+      : IDBFToPostgre; overload;
+
+    function MigrateTable(const DBFTableName, PGTableName: string;
+      ProgressCallback: TProgressCallback): IDBFToPostgre; overload;
 
     constructor Create(ADSConnection, PGConnection: TFDConnection);
   public
-    function MigrateTable(const DBFTableName, PGTableName: string)
-      : TDBFToPostgre; overload;
-
-    function MigrateTable(const DBFTableName, PGTableName: string;
-      ProgressCallback: TProgressCallback): TDBFToPostgre; overload;
 
     class function New(ADSConnection, PGConnection: TFDConnection)
-      : TDBFToPostgre;
+      : IDBFToPostgre;
   end;
 
 implementation
@@ -123,7 +125,7 @@ begin
 end;
 
 function TDBFToPostgre.MigrateTable(const DBFTableName, PGTableName: string;
-  ProgressCallback: TProgressCallback): TDBFToPostgre;
+  ProgressCallback: TProgressCallback): IDBFToPostgre;
 var
   DBFQuery: TFDQuery;
 begin
@@ -131,11 +133,8 @@ begin
   FDriverADS.DefaultPath := ExtractFilePath(ParamStr(0));
   FDriverADS.ShowDeleted := False;
 
-{$IFDEF WIN32}
-  FDriverADS.VendorLib := ExtractFilePath(ParamStr(0)) + 'ace32.dll';
-{$ELSE}
   FDriverADS.VendorLib := ExtractFilePath(ParamStr(0)) + 'ace64.dll';
-{$ENDIF}
+
   DBFQuery := TFDQuery.Create(FADSConnection);
   try
     DBFQuery.Connection := FADSConnection;
@@ -327,7 +326,7 @@ begin
 end;
 
 function TDBFToPostgre.MigrateTable(const DBFTableName, PGTableName: string)
-  : TDBFToPostgre;
+  : IDBFToPostgre;
 var
   DBFQuery: TFDQuery;
 begin
@@ -335,7 +334,11 @@ begin
   FDriverADS.DefaultPath := ExtractFilePath(ParamStr(0));
   FDriverADS.ShowDeleted := False;
 
+{$IFDEF WIN32}
+  FDriverADS.VendorLib := ExtractFilePath(ParamStr(0)) + 'ace32.dll';
+{$ELSE}
   FDriverADS.VendorLib := ExtractFilePath(ParamStr(0)) + 'ace64.dll';
+{$ENDIF}
 
   DBFQuery := TFDQuery.Create(FADSConnection);
   try
@@ -361,7 +364,7 @@ begin
 end;
 
 class function TDBFToPostgre.New(ADSConnection, PGConnection: TFDConnection)
-  : TDBFToPostgre;
+  : IDBFToPostgre;
 begin
   Result := Self.Create(ADSConnection, PGConnection);
 end;

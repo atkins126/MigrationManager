@@ -33,10 +33,12 @@ uses
   FireDAC.ConsoleUI.Wait,
   FireDAC.Stan.ExprFuncs,
   FireDAC.Phys.SQLiteDef,
-  FireDAC.Stan.StorageBin;
+  FireDAC.Stan.StorageBin,
+
+  Repository.Migration.Manager;
 
 type
-  TConnection = class
+  TConnection = class(TInterfacedObject, IConnection)
   private
     FADSConnection: TFDConnection;
     FPGConnection: TFDConnection;
@@ -45,18 +47,20 @@ type
     procedure SetupPGConnection(const Host, Database, User, Password: string;
       Port: Integer);
   protected
+
+    function ConnectDBF(const DBFPath: string): IConnection;
+    function ConnectPostgreSQL(const Host, Database, User, Password: string;
+      Port: Integer): IConnection;
+    function GetDBFConnection: TFDConnection;
+    function GetPGConnection: TFDConnection;
+
+
     constructor Create;
 
   public
     destructor Destroy; override;
 
-    function ConnectDBF(const DBFPath: string): TConnection;
-    function ConnectPostgreSQL(const Host, Database, User, Password: string;
-      Port: Integer): TConnection;
-    function GetDBFConnection: TFDConnection;
-    function GetPGConnection: TFDConnection;
-
-    class function New: TConnection;
+    class function New: IConnection;
 
   end;
 
@@ -113,7 +117,7 @@ begin
   FPGConnection.Params.Add('Port=' + Port.ToString);
 end;
 
-function TConnection.ConnectDBF(const DBFPath: string): TConnection;
+function TConnection.ConnectDBF(const DBFPath: string): IConnection;
 begin
   Result := Self;
 
@@ -127,7 +131,7 @@ begin
 end;
 
 function TConnection.ConnectPostgreSQL(const Host, Database, User,
-  Password: string; Port: Integer): TConnection;
+  Password: string; Port: Integer): IConnection;
 begin
   Result := Self;
 
@@ -150,7 +154,7 @@ begin
   Result := FPGConnection;
 end;
 
-class function TConnection.New: TConnection;
+class function TConnection.New: IConnection;
 begin
   Result := Self.Create;
 end;

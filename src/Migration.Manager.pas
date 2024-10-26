@@ -5,28 +5,32 @@ interface
 uses
   System.SysUtils,
   Model.Callback,
-  Model.Migrator;
+  Model.Migrator,
+
+  Repository.Migration.Manager;
 
 type
-  TMigrationManager = class
+  TMigrationManager = class(TInterfacedObject, IMigrationManager)
   private
-    FMigrator: TMigrator;
-  public
-    constructor Create;
-    destructor Destroy; override;
-
+    FMigrator: IMigrator;
+  protected
     function ConfigureMigration(const DBFPath, Host, Database, User,
-      Password: string; Port: Integer): TMigrationManager;
+      Password: string; Port: Integer): IMigrationManager;
 
     function ExecuteMigration(const DBFTableName, PGTableName: string)
-      : TMigrationManager; overload;
+      : IMigrationManager; overload;
 
     function ExecuteMigration(const DBFTableName, PGTableName: string;
-      ProgressCallback: TProgressCallback): TMigrationManager; overload;
+      ProgressCallback: TProgressCallback): IMigrationManager; overload;
 
     function GetMigrationStatus: string;
 
-    class function New: TMigrationManager;
+    constructor Create;
+  public
+    destructor Destroy; override;
+
+
+    class function New: IMigrationManager;
   end;
 
 implementation
@@ -41,12 +45,11 @@ end;
 
 destructor TMigrationManager.Destroy;
 begin
-  FMigrator.Free;
   inherited;
 end;
 
 function TMigrationManager.ExecuteMigration(const DBFTableName,
-  PGTableName: string; ProgressCallback: TProgressCallback): TMigrationManager;
+  PGTableName: string; ProgressCallback: TProgressCallback): IMigrationManager;
 begin
   Result := Self;
   try
@@ -59,7 +62,7 @@ begin
 end;
 
 function TMigrationManager.ConfigureMigration(const DBFPath, Host, Database,
-  User, Password: string; Port: Integer): TMigrationManager;
+  User, Password: string; Port: Integer): IMigrationManager;
 begin
   Result := Self;
   try
@@ -72,7 +75,7 @@ begin
 end;
 
 function TMigrationManager.ExecuteMigration(const DBFTableName,
-  PGTableName: string): TMigrationManager;
+  PGTableName: string): IMigrationManager;
 begin
   Result := Self;
   try
@@ -89,7 +92,7 @@ begin
   Result := 'Migração concluída com sucesso!';
 end;
 
-class function TMigrationManager.New: TMigrationManager;
+class function TMigrationManager.New: IMigrationManager;
 begin
   Result := Self.Create;
 end;
