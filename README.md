@@ -1,218 +1,209 @@
-# Project Migration
+# Documentação Técnica do Projeto de Migração
 
-## Descrição
-Este projeto foi desenvolvido para realizar a migração de dados de um banco de dados **DBF (Advantage Database Server)** para um banco de dados **PostgreSQL**. Ele foi implementado em Delphi, utilizando a biblioteca **FireDAC** para gerenciar as conexões com os bancos de dados. A aplicação oferece uma interface gráfica simples e direta para configurar conexões e monitorar o progresso da migração.
+## Introdução
+Este projeto foi desenvolvido para facilitar a migração de dados de um banco de dados **DBF (Advantage Database Server)** para **PostgreSQL**, utilizando a linguagem **Delphi** e a biblioteca **FireDAC** para gerenciar as conexões e manipular os dados. A estrutura modular do código foi projetada para garantir flexibilidade e facilidade de manutenção.
 
-## Estrutura do Projeto
+## Estrutura das Classes e Interfaces
 
-O projeto foi estruturado de forma modular, separando responsabilidades em diferentes unidades para facilitar a manutenção e a extensão do código. Abaixo, detalhamos cada unidade do projeto e suas funcionalidades.
+### 1. **`IMigrationManager`**
 
-### 1. View.Main
+**Descrição**: Interface responsável por gerenciar todo o processo de migração, desde a configuração das conexões até a execução do processo de transferência de dados.
 
-**Descrição**: Unidade responsável pela interface gráfica da aplicação, permitindo que o usuário configure as conexões, selecione os arquivos, e visualize o progresso da migração.
+**Métodos Principais**:
+- `Host(const AValue: string): IMigrationManager`: Define o host do banco de dados PostgreSQL.
+- `Path(const AValue: string): IMigrationManager`: Define o caminho do arquivo `.dbf` de origem.
+- `Database(const AValue: string): IMigrationManager`: Define o nome do banco de dados PostgreSQL.
+- `User(const AValue: string): IMigrationManager`: Define o usuário para a conexão.
+- `Password(const AValue: string): IMigrationManager`: Define a senha para a conexão.
+- `Port(const AValue: Integer): IMigrationManager`: Define a porta de conexão.
+- `ADSTableName(const AValue: string): IMigrationManager`: Define o nome da tabela de origem no DBF.
+- `PGTableName(const AValue: string): IMigrationManager`: Define o nome da tabela de destino no PostgreSQL.
+- `Execute: IMigrationManager`: Executa o processo de migração.
 
-**Principais Componentes**:
-- `TPageMain`: Classe que representa o formulário principal.
-- **Campos**:
-  - `FMigration: IMigrationManager`: Instância do gerenciador de migração.
-  - `FThread: TThread`: Thread para execução assíncrona do processo de migração.
-  - `FStartTime: TDateTime`: Tempo de início para cálculo do tempo decorrido.
-
-**Métodos**:
-- `ApplyConfiguration`: Configura os valores padrão dos componentes visuais.
-- `DatabaseConfiguration`: Configura as conexões para DBF e PostgreSQL com base nas entradas do usuário.
-- `MigrateTable`: Executa a migração com ou sem um callback para exibir o progresso.
-- `UpdateProgress`: Atualiza a barra de progresso e o status com os dados atuais do processo de migração.
-- `GetElapsedTime`: Calcula o tempo decorrido desde o início da migração.
-  
 **Exemplo de Uso**:
-No evento de clique do botão **Iniciar Migração**, a aplicação chama `DatabaseConfiguration` para configurar as conexões e depois executa `MigrateTable` para iniciar o processo. Se a caixa de seleção de status estiver marcada, o progresso será monitorado e exibido ao usuário.
-
 ```pascal
-procedure TPageMain.btMigrationClick(Sender: TObject);
+var
+  Migration: IMigrationManager;
 begin
-  FMigration := TMigrationManager.New;
-  DatabaseConfiguration;
-  MigrateTable(UpdateProgress);
+  Migration := TMigrationManager.New;
+  Migration.Host('localhost')
+           .Path('C:\dados\clientes.dbf')
+           .Database('MeuBanco')
+           .User('postgres')
+           .Password('senha')
+           .Port(5432)
+           .ADSTableName('ClientesDBF')
+           .PGTableName('ClientesPostgreSQL')
+           .Execute;
 end;
 ```
 
-### 2. Repository.Migration.Manager
+### 2. **`IMigrator`**
 
-**Descrição**: Define as interfaces que coordenam o processo de migração de dados, incluindo as conexões e o controle da transferência de dados entre os bancos de dados.
+**Descrição**: Interface que realiza a migração de uma tabela específica entre um banco de dados ADS e um banco PostgreSQL, sendo a responsável direta pelo processo de leitura, conversão e inserção dos registros.
 
-**Principais Interfaces**:
-- `IMigrationManager`: Gerencia a migração de uma tabela de DBF para PostgreSQL.
-- `IMigrator`: Realiza a migração de uma tabela específica.
-- `IConnection`: Gerencia as conexões com os bancos de dados ADS e PostgreSQL.
-
-**Métodos Importantes**:
-- `IMigrationManager.Execute`: Executa o processo de migração de acordo com as configurações definidas.
-- `IConnection.GetADSConnection`: Retorna uma instância configurada de conexão para o banco ADS.
-- `IMigrator.Host`, `IMigrator.Database`, `IMigrator.Port`: Configurações de conexão detalhadas para o banco PostgreSQL.
+**Métodos Principais**:
+- `Host(const AValue: string): IMigrator`: Define o endereço do servidor PostgreSQL.
+- `Path(const AValue: string): IMigrator`: Define o caminho do arquivo `.dbf`.
+- `Database(const AValue: string): IMigrator`: Define o nome do banco de dados de destino.
+- `ADSTableName(const AValue: string): IMigrator`: Define a tabela de origem no banco ADS.
+- `PGTableName(const AValue: string): IMigrator`: Define a tabela de destino no PostgreSQL.
+- `Execute: IMigrator`: Realiza a migração dos registros.
 
 **Exemplo de Uso**:
-A interface `IMigrationManager` é utilizada na classe `TPageMain` para configurar e executar a migração. O código abaixo exemplifica como configurar a conexão:
-
 ```pascal
-FMigration := TMigrationManager.New;
-FMigration.Path('.\data\').Host('localhost').Database('MeuDB')
-  .User('usuario').Password('senha').Port('5432')
-  .ADSTableName('TabelaOrigem').PGTableName('TabelaDestino').Execute;
+var
+  Migrator: IMigrator;
+begin
+  Migrator := TMigrator.New;
+  Migrator.Host('localhost')
+          .Path('C:\dados\produtos.dbf')
+          .Database('VendasDB')
+          .ADSTableName('ProdutosDBF')
+          .PGTableName('ProdutosPostgreSQL')
+          .Execute;
+end;
 ```
 
-### 3. Model.Uteis.Connection
+### 3. **`IConnection`**
 
-**Descrição**: Classe que gerencia a conexão com os bancos de dados, tanto o ADS quanto o PostgreSQL. 
+**Descrição**: Interface que gerencia as conexões com os bancos de dados ADS e PostgreSQL, proporcionando métodos para definir e acessar as configurações de conexão.
 
-**Classe**: `TConnection`
-
-**Principais Métodos**:
-- `Host`: Define o endereço do servidor do banco de dados.
-- `Database`: Define o nome do banco de dados PostgreSQL.
-- `GetADSConnection`: Retorna a instância configurada para a conexão com o ADS.
-- `GetPGConnection`: Retorna a instância configurada para a conexão com o PostgreSQL.
+**Métodos Principais**:
+- `Host(const AValue: string): IConnection`: Define o host do servidor PostgreSQL.
+- `Path(const AValue: string): IConnection`: Define o caminho do banco ADS.
+- `Database(const AValue: string): IConnection`: Define o banco de dados de destino.
+- `GetADSConnection: TFDConnection`: Retorna uma instância configurada de conexão para o banco ADS.
+- `GetPGConnection: TFDConnection`: Retorna uma instância configurada de conexão para o banco PostgreSQL.
 
 **Exemplo de Uso**:
-A configuração de uma conexão com PostgreSQL pode ser feita da seguinte maneira:
-
 ```pascal
 var
   Connection: IConnection;
+  PGConn: TFDConnection;
 begin
   Connection := TConnection.New;
-  Connection.Host('localhost').Database('MeuDB').User('postgres').Password('senha').Port(5432);
-  PGConnection := Connection.GetPGConnection;
+  PGConn := Connection.Host('localhost')
+                      .Database('FinanceiroDB')
+                      .User('postgres')
+                      .Password('12345')
+                      .Port(5432)
+                      .GetPGConnection;
 end;
 ```
 
-### 4. Model.Uteis.Callback
+### 4. **`IDBFToPostgre`**
 
-**Descrição**: Fornece o tipo `TProgressCallback`, que permite monitorar o progresso da migração.
+**Descrição**: Interface que realiza a migração dos dados de uma tabela DBF para uma tabela PostgreSQL, gerenciando a leitura dos registros, a criação da tabela de destino e a transferência dos dados.
 
-**Tipo**: 
-- `TProgressCallback`: Tipo referência que aceita uma função para ser chamada durante o processo de migração.
+**Métodos Principais**:
+- `ADSConnection(const AValue: TFDConnection): IDBFToPostgre`: Define a conexão com o banco ADS.
+- `PGConnection(const AValue: TFDConnection): IDBFToPostgre`: Define a conexão com o banco PostgreSQL.
+- `MigrateTable: IDBFToPostgre`: Realiza a migração dos registros.
 
 **Exemplo de Uso**:
-O callback é passado para o método `MigrateTable` para atualizar a interface gráfica durante o processo de migração:
-
 ```pascal
-procedure TPageMain.UpdateProgress(const TableName: string; TotalRecords, CurrentRecord: Integer);
+var
+  DBFToPostgre: IDBFToPostgre;
 begin
-  TThread.Synchronize(nil,
-    procedure
-    begin
-      lblStatus.Caption := Format('Migrando: %s | Registro %d de %d', [TableName, CurrentRecord, TotalRecords]);
-      ProgressBar.Max := TotalRecords;
-      ProgressBar.Position := CurrentRecord;
-    end);
+  DBFToPostgre := TDBFToPostgre.New;
+  DBFToPostgre.ADSConnection(ADSConnection)
+              .PGConnection(PGConnection)
+              .ADSTableName('Clientes')
+              .PGTableName('ClientesPostgreSQL')
+              .MigrateTable;
 end;
 ```
 
-### 5. Model.Uteis.RTFHandle
+### 5. **`IRTFHandler`**
 
-**Descrição**: Manipula textos em formato RTF, convertendo-os em texto simples para inserção no banco PostgreSQL.
+**Descrição**: Interface para manipulação de textos em formato RTF, convertendo-os para texto simples antes de armazená-los em uma tabela PostgreSQL.
 
-**Classe**: `TRTFHandler`
-
-**Principais Métodos**:
-- `RTFText`: Define o texto RTF a ser processado.
-- `RemoveRTFFormatting`: Remove a formatação RTF e retorna apenas o texto simples.
+**Métodos Principais**:
+- `RTFText(const AValue: string): IRTFHandler`: Define o texto em formato RTF.
+- `RemoveRTFFormatting: string`: Remove a formatação e retorna apenas o texto simples.
 
 **Exemplo de Uso**:
-Um exemplo de como remover a formatação RTF antes de salvar o texto em uma tabela PostgreSQL:
-
 ```pascal
 var
   RTFHandler: IRTFHandler;
-  TextoSimples: string;
+  TextoSemFormatacao: string;
 begin
   RTFHandler := TRTFHandler.New;
-  TextoSimples := RTFHandler.RTFText('{\rtf1\ansi...}').RemoveRTFFormatting;
+  TextoSemFormatacao := RTFHandler.RTFText('{\rtf1\ansi ...}').RemoveRTFFormatting;
 end;
 ```
 
-### 6. Model.Uteis.TypeMapper
+### 6. **`IMapTypeMapper`**
 
-**Descrição**: Mapeia tipos de dados entre o DBF e o PostgreSQL, garantindo que os tipos de campos sejam convertidos corretamente durante a migração.
+**Descrição**: Interface que mapeia os tipos de campos entre o banco de dados DBF e o PostgreSQL, garantindo que cada tipo de dado seja convertido corretamente durante a migração.
 
-**Classe**: `TMapTypeMapper`
-
-**Principais Métodos**:
-- `FieldType`: Define o tipo de campo do DBF.
-- `DBFToPostgreSQL`: Retorna o tipo de campo correspondente para PostgreSQL.
+**Métodos Principais**:
+- `FieldType(AValue: TFieldType): IMapTypeMapper`: Define o tipo de campo a ser convertido.
+- `DBFToPostgreSQL: string`: Retorna o tipo correspondente em PostgreSQL.
 
 **Exemplo de Uso**:
-Durante a criação de uma tabela PostgreSQL com base em uma tabela DBF, o mapeamento de tipos é utilizado para converter os campos corretamente:
-
 ```pascal
 var
   TypeMapper: IMapTypeMapper;
   PostgreSQLType: string;
 begin
   TypeMapper := TMapTypeMapper.New;
-  PostgreSQLType := TypeMapper.FieldType(ftString).DBFToPostgreSQL;
+  PostgreSQLType := TypeMapper.FieldType(ftString).DBFToPostgreSQL; // Exemplo: 'VARCHAR'
 end;
 ```
 
-### 7. Model.Uteis.DataTransfer
+### 7. **`IBuildTable`**
 
-**Descrição**: Classe responsável pela transferência de dados de uma tabela DBF para uma tabela PostgreSQL, incluindo a inserção dos registros.
+**Descrição**: Interface responsável pela construção de tabelas no PostgreSQL com base na estrutura de uma tabela DBF, utilizando o mapeamento de tipos para garantir compatibilidade entre as estruturas.
 
-**Classe**: `TDataTransfer`
-
-**Principais Métodos**:
-- `Connection`: Define a conexão para transferência dos dados.
-- `Query`: Define a consulta de origem (DBF).
-- `Execute`: Executa a transferência de dados para a tabela PostgreSQL.
+**Métodos Principais**:
+- `Connection(const AValue: TFDConnection): IBuildTable`: Define a conexão com o PostgreSQL.
+- `Query(const AValue: TFDQuery): IBuildTable`: Define a consulta que contém a estrutura da tabela DBF.
+- `DBFToPostgreSQL: IBuildTable`: Cria a tabela PostgreSQL com base na estrutura da consulta DBF.
 
 **Exemplo de Uso**:
-A transferência de dados de uma tabela DBF para uma tabela PostgreSQL é feita da seguinte forma:
-
-```pascal
-var
-  DataTransfer: IDataTransfer;
-begin
-  DataTransfer := TDataTransfer.New;
-  DataTransfer.Connection(PGConnection).Query(DBFQuery).TableName('TabelaDestino').Execute;
-end;
-```
-
-### 8. Model.Uteis.BuildTable
-
-**Descrição**: Classe que cria a estrutura da tabela PostgreSQL com base na estrutura da tabela DBF, utilizando o mapeamento de tipos.
-
-**Classe**: `TBuildTable`
-
-**Principais Métodos**:
-- `Connection`: Define a conexão com o banco de dados PostgreSQL.
-- `Query`: Define a consulta que contém a estrutura dos dados DBF.
-- `DBFToPostgreSQL`: Cria a tabela PostgreSQL correspondente.
-
-**Exemplo de Uso**:
-Criar uma tabela em PostgreSQL com base na estrutura de uma consulta DBF:
-
 ```pascal
 var
   TableBuilder: IBuildTable;
 begin
   TableBuilder := TBuildTable.New;
-  TableBuilder.Connection(PGConnection).Query(DBFQuery).TableName('TabelaDestino').DBFToPostgreSQL;
+  TableBuilder.Connection(PGConnection)
+               .Query(DBFQuery)
+               .TableName('ClientesPostgreSQL')
+               .DBFToPostgreSQL;
 end;
 ```
 
-## Contribuições
+### 8. **`IDataTransfer`**
 
-Contribuições são sempre bem-vindas! Siga os passos abaixo para contribuir com o projeto:
+**Descrição**: Interface que realiza a transferência dos registros de uma consulta DBF para uma tabela PostgreSQL, gerenciando o processo de inserção em lote para otimizar a transferência.
 
-## Licença
+**Métodos Principais**:
+- `Connection(const AValue: TFDConnection): IDataTransfer`: Define a conexão com o PostgreSQL.
+- `Query(const AValue: TFDQuery): IDataTransfer`: Define a consulta que será utilizada como origem dos dados.
+- `TableName(const AValue: string): IDataTransfer`: Define o nome da tabela de destino.
+- `BlockSize(const AValue: Int64): IDataTransfer`: Define o número de registros por lote.
+- `Execute: IDataTransfer`: Realiza a transferência de registros.
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
-## Contato
-
-- **Autor**: Ricardo R. Pereira
+**Exemplo de Uso**:
+```pascal
+var
+  DataTransfer: IDataTransfer;
+begin
+  DataTransfer := TDataTransfer.New;
+  DataTransfer.Connection(PGConnection)
+               .Query(DBFQuery)
+               .TableName('ClientesPostgreSQL')
+               .BlockSize(100)
+               .Execute;
+end;
 ```
 
-### Conclusão
-Este `README.md` foi elaborado para oferecer uma visão detalhada de cada parte do projeto, explicando as unidades, classes, interfaces e métodos, além de fornecer exemplos práticos de uso. A linguagem técnica e os exemplos visam ajudar outros desenvolvedores a compreenderem como cada componente pode ser integrado no contexto do projeto. Se precisar de ajustes ou mais informações, é só me avisar!
+## Considerações Finais
+
+Este projeto é ideal para desenvol
+
+vedores que precisam realizar migrações de dados de bancos **DBF** para **PostgreSQL** de forma automatizada e segura. A separação de responsabilidades em diferentes classes e interfaces facilita a manutenção e a extensibilidade do código, tornando-o um bom ponto de partida para projetos de migração de dados em Delphi.
+
+Cada interface foi projetada para ser intuitiva e fácil de integrar em diferentes cenários, permitindo que o desenvolvedor tenha controle total sobre o processo de migração, desde a configuração das conexões até a transferência dos dados.
