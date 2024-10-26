@@ -240,7 +240,11 @@ begin
   FADSConnection.Params.Add('Locking=Compatible');
 
   FDriverADS.DefaultPath := ExtractFilePath(ParamStr(0));
+{$IFDEF WIN32}
+  FDriverADS.VendorLib := ExtractFilePath(ParamStr(0)) + 'ace32.dll';
+{$ELSE}
   FDriverADS.VendorLib := ExtractFilePath(ParamStr(0)) + 'ace64.dll';
+{$ENDIF}
   FDriverADS.ShowDeleted := False;
 end;
 
