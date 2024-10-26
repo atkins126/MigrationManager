@@ -105,12 +105,16 @@
         <DCCReference Include="FireDACPgDriver.dcp"/>
         <DCCReference Include="FireDACSqliteDriver.dcp"/>
         <DCCReference Include="FireDACADSDriver.dcp"/>
-        <DCCReference Include="src\Migration.Manager.pas"/>
         <DCCReference Include="src\Repositories\Repository.Migration.Manager.pas"/>
-        <DCCReference Include="src\Models\Model.Callback.pas"/>
-        <DCCReference Include="src\Models\Model.Connection.pas"/>
         <DCCReference Include="src\Models\Model.DBFToPostgre.pas"/>
         <DCCReference Include="src\Models\Model.Migrator.pas"/>
+        <DCCReference Include="src\Models\Uteis\Model.Uteis.BuildTable.pas"/>
+        <DCCReference Include="src\Models\Uteis\Model.Uteis.Callback.pas"/>
+        <DCCReference Include="src\Models\Uteis\Model.Uteis.Connection.pas"/>
+        <DCCReference Include="src\Models\Uteis\Model.Uteis.DataTransfer.pas"/>
+        <DCCReference Include="src\Models\Uteis\Model.Uteis.RTFHandle.pas"/>
+        <DCCReference Include="src\Models\Uteis\Model.Uteis.TypeMapper.pas"/>
+        <DCCReference Include="src\Migration.Manager.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

@@ -13,7 +13,7 @@ uses
 
   System.Classes,
 
-  Model.Callback,
+  Model.Uteis.Callback,
   Migration.Manager,
   Repository.Migration.Manager;
 
@@ -132,9 +132,12 @@ procedure TPageMain.DatabaseConfiguration;
 begin
   try
     try
-      FMigration.ConfigureMigration(edtPathDBF.Text, edtHostPostgre.Text,
-        edtDataBasePostgre.Text, edtUserPostgre.Text, edtPassPostgre.Text,
-        StrToInt(edtPortPostgre.Text));
+      FMigration.Path(edtPathDBF.Text).Host(edtHostPostgre.Text)
+        .Database(edtDataBasePostgre.Text).User(edtUserPostgre.Text)
+        .Password(edtPassPostgre.Text).Port(edtPortPostgre.Text)
+        .ADSTableName(edtTableNameDBF.Text)
+        .PGTableName(edtTableNamePostgre.Text);
+
       lblStatus.Caption := 'Configuração concluída com sucesso!';
     except
       on E: Exception do
@@ -163,7 +166,8 @@ begin
   LMilliseconds := LMilliseconds mod (60 * 1000);
   LSeconds := LMilliseconds div 1000;
   LMilliseconds := LMilliseconds mod 1000;
-  Result := Format('%0.2d:%0.2d:%0.2d.%0.3d', [LHours, LMinutes, LSeconds, LMilliseconds]);
+  Result := Format('%0.2d:%0.2d:%0.2d.%0.3d', [LHours, LMinutes, LSeconds,
+    LMilliseconds]);
 end;
 
 procedure TPageMain.MigrateTable(Callback: TProgressCallback);
@@ -177,8 +181,7 @@ begin
     procedure
     begin
       FStartThread := True;
-      FMigration.ExecuteMigration(edtTableNameDBF.Text,
-        edtTableNamePostgre.Text, Callback);
+      FMigration.Callback(Callback).Execute;
     end);
 
   FThread.FreeOnTerminate := True;
@@ -197,10 +200,12 @@ begin
         ProgressBar.Visible := False;
         pnlCloseStatus.Visible := True;
         FStartThread := False;
+
         if Assigned(TThread(Sender).FatalException) then
-          lblStatus.Caption := 'Erro: ' + Exception(TThread(Sender).FatalException).Message
+          lblStatus.Caption := 'Erro: ' + Exception(TThread(Sender)
+            .FatalException).Message
         else if Assigned(FMigration) then
-          lblStatus.Caption := FMigration.GetMigrationStatus + sLineBreak +
+          lblStatus.Caption := FMigration.Status + sLineBreak +
             'Tempo de operação: ' + GetElapsedTime(FStartTime);
       end);
   end;
@@ -216,8 +221,7 @@ begin
     procedure
     begin
       FStartThread := True;
-      FMigration.ExecuteMigration(edtTableNameDBF.Text,
-        edtTableNamePostgre.Text);
+      FMigration.Callback(Nil).Execute;
     end);
 
   FThread.FreeOnTerminate := True;

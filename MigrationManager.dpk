@@ -39,11 +39,15 @@ requires
   FireDACADSDriver;
 
 contains
-  Migration.Manager in 'src\Migration.Manager.pas',
   Repository.Migration.Manager in 'src\Repositories\Repository.Migration.Manager.pas',
-  Model.Callback in 'src\Models\Model.Callback.pas',
-  Model.Connection in 'src\Models\Model.Connection.pas',
   Model.DBFToPostgre in 'src\Models\Model.DBFToPostgre.pas',
-  Model.Migrator in 'src\Models\Model.Migrator.pas';
+  Model.Migrator in 'src\Models\Model.Migrator.pas',
+  Model.Uteis.BuildTable in 'src\Models\Uteis\Model.Uteis.BuildTable.pas',
+  Model.Uteis.Callback in 'src\Models\Uteis\Model.Uteis.Callback.pas',
+  Model.Uteis.Connection in 'src\Models\Uteis\Model.Uteis.Connection.pas',
+  Model.Uteis.DataTransfer in 'src\Models\Uteis\Model.Uteis.DataTransfer.pas',
+  Model.Uteis.RTFHandle in 'src\Models\Uteis\Model.Uteis.RTFHandle.pas',
+  Model.Uteis.TypeMapper in 'src\Models\Uteis\Model.Uteis.TypeMapper.pas',
+  Migration.Manager in 'src\Migration.Manager.pas';
 
 end.
