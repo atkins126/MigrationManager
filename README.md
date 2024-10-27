@@ -202,8 +202,6 @@ end;
 
 ## Considerações Finais
 
-Este projeto é ideal para desenvol
-
-vedores que precisam realizar migrações de dados de bancos **DBF** para **PostgreSQL** de forma automatizada e segura. A separação de responsabilidades em diferentes classes e interfaces facilita a manutenção e a extensibilidade do código, tornando-o um bom ponto de partida para projetos de migração de dados em Delphi.
+Este projeto é ideal para desenvolvedores que precisam realizar migrações de dados de bancos **DBF** para **PostgreSQL** de forma automatizada e segura. A separação de responsabilidades em diferentes classes e interfaces facilita a manutenção e a extensibilidade do código, tornando-o um bom ponto de partida para projetos de migração de dados em Delphi.
 
 Cada interface foi projetada para ser intuitiva e fácil de integrar em diferentes cenários, permitindo que o desenvolvedor tenha controle total sobre o processo de migração, desde a configuração das conexões até a transferência dos dados.
