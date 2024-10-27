@@ -1,4 +1,4 @@
-# Documentação Técnica do Projeto de Migração
+# Migration Manager
 
 ## Introdução
 Este projeto foi desenvolvido para facilitar a migração de dados de um banco de dados **DBF (Advantage Database Server)** para **PostgreSQL**, utilizando a linguagem **Delphi** e a biblioteca **FireDAC** para gerenciar as conexões e manipular os dados. A estrutura modular do código foi projetada para garantir flexibilidade e facilidade de manutenção.
