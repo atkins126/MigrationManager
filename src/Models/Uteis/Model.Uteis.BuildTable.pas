@@ -151,7 +151,7 @@ begin
       LFieldType := TMapTypeMapper.New.FieldType(FQuery.Fields[I].DataType)
         .DBFToPostgreSQL;
 
-      LSQL.Add(Format('"%s" %s', [LFieldName, LFieldType]));
+      LSQL.Add(Format('"%s" %s', [LFieldName.ToLower, LFieldType]));
 
       if I < Pred(FQuery.FieldCount) then
         LSQL[Pred(LSQL.Count)] := LSQL[Pred(LSQL.Count)] + ',';
@@ -184,7 +184,7 @@ end;
 function TBuildTable.TableName(const AValue: string): IBuildTable;
 begin
   Result := Self;
-  FTableName := AValue;
+  FTableName := AValue.ToLower;
 end;
 
 end.
