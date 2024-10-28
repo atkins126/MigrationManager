@@ -178,7 +178,7 @@ begin
 
   edtHostPostgre.Text := 'localhost';
   edtPortPostgre.Text := '5432';
-  edtDataBasePostgre.Text := 'EFPGDB';
+  edtDataBasePostgre.Text := 'DBMigration';
   edtUserPostgre.Text := 'postgres';
   edtPassPostgre.Text := 'postgres';
   edtTableNamePostgre.Text := 'produto';
