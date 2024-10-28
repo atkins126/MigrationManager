@@ -180,7 +180,7 @@ begin
   edtPortPostgre.Text := '5432';
   edtDataBasePostgre.Text := 'EFPGDB';
   edtUserPostgre.Text := 'postgres';
-  edtPassPostgre.Text := '1977kado';
+  edtPassPostgre.Text := 'postgres';
   edtTableNamePostgre.Text := 'produto';
 end;
 
